@@ -1,9 +1,11 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
+
 import '../core/api/api_service.dart';
 import '../core/di.dart';
+import '../models/product.dart';
 
 class ProductProvider extends ChangeNotifier {
-  List products = [];
+  List<Product> products = [];
   bool loading = false;
 
   Future<void> fetchProducts() async {
@@ -11,7 +13,8 @@ class ProductProvider extends ChangeNotifier {
     notifyListeners();
     final api = getIt<ApiService>();
     final response = await api.getProducts();
-    products = response.data['products'];
+    final List items = response.data['products'] ?? [];
+    products = items.map((json) => Product.fromJson(json)).toList();
     loading = false;
     notifyListeners();
   }

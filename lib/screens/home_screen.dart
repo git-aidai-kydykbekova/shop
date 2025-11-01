@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../models/product.dart';
 import '../providers/product_provider.dart';
 import '../providers/cart_provider.dart';
 import 'cart_screen.dart';
@@ -39,19 +40,19 @@ class _HomeScreenState extends State<HomeScreen> {
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2, crossAxisSpacing: 10, mainAxisSpacing: 10, childAspectRatio: 0.7),
         itemBuilder: (context, i) {
-          final p = products.products[i];
+          final Product p = products.products[i];
           return Card(
             elevation: 3,
             child: Column(
               children: [
                 Expanded(
-                  child: Image.network(p['thumbnail'], fit: BoxFit.cover),
+                  child: Image.network(p.thumbnail, fit: BoxFit.cover),
                 ),
-                Text(p['title'], maxLines: 1, overflow: TextOverflow.ellipsis),
-                Text('\$${p['price']}'),
+                Text(p.title, maxLines: 1, overflow: TextOverflow.ellipsis),
+                Text('\$${p.price}'),
                 ElevatedButton(
                   onPressed: () {
-                    cart.addToCart(p);
+                    cart.addToCart(p as Map<String, dynamic>);
                     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Added to cart')));
                   },
                   child: const Text('Add'),
@@ -64,3 +65,4 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
+

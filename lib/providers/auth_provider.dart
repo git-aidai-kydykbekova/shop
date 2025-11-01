@@ -1,29 +1,30 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../core/di.dart';
+import 'package:dio/dio.dart';
 import '../core/api/api_service.dart';
+import '../core/di.dart';
 
-class AuthProvider extends ChangeNotifier {
-  bool isLoggedIn = false;
-  String? token;
+class AuthProvider with ChangeNotifier {
+  final ApiService _apiService = getIt<ApiService>();
+
+  String? _token;
+  bool get isLoggedIn => _token != null;
+  String? get token => _token;
 
   Future<void> login(String username, String password) async {
-    final api = getIt<ApiService>();
-    final response = await api.login(username, password);
-
-    if (response.statusCode == 200) {
-      token = response.data['token'];
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('token', token!);
-      isLoggedIn = true;
+    try {
+      final res = await _apiService.login(username, password);
+      _token = res.data['accessToken'];
       notifyListeners();
+      debugPrint('Login success. Token: $_token');
+    } on DioException catch (e) {
+      debugPrint('Login failed: ${e.response?.data}');
+      rethrow;
     }
   }
 
-  Future<void> logout() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('token');
-    isLoggedIn = false;
-    notifyListeners();
+  Future<Map<String, dynamic>?> getProfile() async {
+    if (_token == null) return null;
+    final res = await _apiService.getMe(_token!);
+    return res.data;
   }
 }
